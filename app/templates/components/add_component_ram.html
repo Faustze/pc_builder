@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Add RAM{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">🧠 Add RAM</h3>
+
+          <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.brand_id.label(class="form-label") }}
+              {{ form.brand_id(class="form-select") }}
+              {% for error in form.brand_id.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.model.label(class="form-label") }}
+              {{ form.model(class="form-control") }}
+              {% for error in form.model.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.quantity.label(class="form-label") }}
+              {{ form.quantity(class="form-control", type="number") }}
+              {% for error in form.quantity.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.memory_type_id.label(class="form-label") }}
+              {{ form.memory_type_id(class="form-select") }}
+              {% for error in form.memory_type_id.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.capacity.label(class="form-label") }}
+              {{ form.capacity(class="form-control", type="number") }}
+              {% for error in form.capacity.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.frequency.label(class="form-label") }}
+              {{ form.frequency(class="form-control", type="number") }}
+              {% for error in form.frequency.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="d-grid">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

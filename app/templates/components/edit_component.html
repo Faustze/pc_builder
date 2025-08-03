@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Component{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">
+            ✏️ Edit {{ component.component_type|upper }}: <strong>{{ component.model }}</strong>
+          </h3>
+
+          <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.brand_id.label(class="form-label") }}
+              {{ form.brand_id(class="form-select") }}
+              {% for error in form.brand_id.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.model.label(class="form-label") }}
+              {{ form.model(class="form-control") }}
+              {% for error in form.model.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.quantity.label(class="form-label") }}
+              {{ form.quantity(class="form-control", type="number") }}
+              {% for error in form.quantity.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            {% if component.component_type == 'motherboard' %}
+              <div class="mb-3">
+                {{ form.socket_type_id.label(class="form-label") }}
+                {{ form.socket_type_id(class="form-select") }}
+                {% for error in form.socket_type_id.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ form.memory_type_id.label(class="form-label") }}
+                {{ form.memory_type_id(class="form-select") }}
+                {% for error in form.memory_type_id.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="form-check mb-3">
+                {{ form.has_integrated_graphics(class="form-check-input") }}
+                {{ form.has_integrated_graphics.label(class="form-check-label") }}
+                {% for error in form.has_integrated_graphics.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+            {% elif component.component_type == 'cpu' %}
+              <div class="mb-3">
+                {{ form.socket_type_id.label(class="form-label") }}
+                {{ form.socket_type_id(class="form-select") }}
+                {% for error in form.socket_type_id.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ form.cores.label(class="form-label") }}
+                {{ form.cores(class="form-control", type="number") }}
+                {% for error in form.cores.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ form.threads.label(class="form-label") }}
+                {{ form.threads(class="form-control", type="number") }}
+                {% for error in form.threads.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="form-check mb-3">
+                {{ form.has_integrated_graphics(class="form-check-input") }}
+                {{ form.has_integrated_graphics.label(class="form-check-label") }}
+                {% for error in form.has_integrated_graphics.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+            {% elif component.component_type == 'gpu' %}
+              <div class="mb-3">
+                {{ form.vram.label(class="form-label") }}
+                {{ form.vram(class="form-control", type="number") }}
+                {% for error in form.vram.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+            {% elif component.component_type == 'ram' %}
+              <div class="mb-3">
+                {{ form.memory_type_id.label(class="form-label") }}
+                {{ form.memory_type_id(class="form-select") }}
+                {% for error in form.memory_type_id.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ form.capacity.label(class="form-label") }}
+                {{ form.capacity(class="form-control", type="number") }}
+                {% for error in form.capacity.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ form.frequency.label(class="form-label") }}
+                {{ form.frequency(class="form-control", type="number") }}
+                {% for error in form.frequency.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+            {% elif component.component_type == 'soundcard' %}
+              <div class="mb-3">
+                {{ form.channels_quantity.label(class="form-label") }}
+                {{ form.channels_quantity(class="form-control", type="number") }}
+                {% for error in form.channels_quantity.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between mt-4">
+              {{ form.submit(class="btn btn-success") }}
+              <a href="{{ url_for('get_components_page') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Components{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🧩 Components</h2>
+        <a href="{{ url_for('add_component') }}" class="btn btn-success">
+            ➕ Add Component
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ url_for('get_components_page') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="component_type" class="form-label">Component Type</label>
+                    <select class="form-select" name="component_type" id="component_type">
+                        <option value="">All</option>
+                        {% for t in ['motherboard', 'cpu', 'gpu', 'ram', 'soundcard'] %}
+                            <option value="{{ t }}" {% if t == selected_type %}selected{% endif %}>
+                                {{ t|upper }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="brand_id" class="form-label">Brand</label>
+                    <select class="form-select" name="brand_id" id="brand_id">
+                        <option value="">All</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.id }}"
+                                    {% if brand.id|string == selected_brand %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary">Apply</button>
+                    <a href="{{ url_for('get_components_page') }}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">№</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Brand</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Details</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Updated</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for component in components %}
+                    <tr>
+                        <th scope="row">{{ loop.index }}</th>
+                        <td>{{ component.component_type|upper }}</td>
+                        <td>{{ component.brand_rel.name }}</td>
+                        <td>{{ component.model }}</td>
+                        <td>{{ component.quantity }}</td>
+                        <td>
+                            {% if component.component_type == 'motherboard' %}
+                                <small class="text-muted">
+                                    Socket: {{ component.socket_type_rel.name }}<br>
+                                    Memory: {{ component.memory_type_rel.name }}<br>
+                                    Graphics: {{ 'Yes' if component.has_integrated_graphics else 'No' }}
+                                </small>
+                            {% elif component.component_type == 'cpu' %}
+                                <small class="text-muted">
+                                    Socket: {{ component.socket_type_rel.name }}<br>
+                                    Cores: {{ component.cores }} / Threads: {{ component.threads }}<br>
+                                    Graphics: {{ 'Yes' if component.has_integrated_graphics else 'No' }}
+                                </small>
+                            {% elif component.component_type == 'ram' %}
+                                <small class="text-muted">
+                                    Type: {{ component.memory_type_rel.name }}<br>
+                                    Freq: {{ component.frequency }} MHz<br>
+                                    Capacity: {{ component.capacity }} GB
+                                </small>
+                            {% elif component.component_type == 'gpu' %}
+                                <small class="text-muted">
+                                    VRAM: {{ component.vram }} GB
+                                </small>
+                            {% elif component.component_type == 'soundcard' %}
+                                <small class="text-muted">
+                                    Channels: {{ component.channels_quantity }}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ component.created_at.strftime('%H:%M UTC (%Y-%m-%d)') if component.created_at else '' }}</small>
+                        </td>
+                        <td>
+                            <small>{{ component.updated_at.strftime('%H:%M UTC (%Y-%m-%d)') if component.updated_at else '' }}</small>
+                        </td>
+                        <td class="text-nowrap">
+                            <a href="{{ url_for('edit_component', component_id=component.id) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                ✏️ Edit
+                            </a>
+                            <form action="{{ url_for('delete_component', component_id=component.id) }}"
+                                  method="POST" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to delete this component?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    🗑️ Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

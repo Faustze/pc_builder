@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Classificators{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+    <div class="accordion" id="classificatorAccordion">
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBrands">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBrands" aria-expanded="false" aria-controls="collapseBrands">
+                    🏷️ Brands
+                </button>
+            </h2>
+            <div id="collapseBrands" class="accordion-collapse collapse" aria-labelledby="headingBrands" data-bs-parent="#classificatorAccordion">
+                <div class="accordion-body">
+
+                    <form method="POST" class="mb-3">
+                        {{ brand_form.hidden_tag() }}
+                        <input type="hidden" name="form-name" value="brand">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ brand_form.name.label(class="form-label") }}
+                                {{ brand_form.name(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ brand_form.component_type.label(class="form-label") }}
+                                {{ brand_form.component_type(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-3">
+                            ➕ Add Brand
+                        </button>
+                    </form>
+
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Component Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for brand in brands %}
+                            <tr>
+                                <td>{{ brand.name }}</td>
+                                <td>{{ brand.component_type|upper }}</td>
+                                <td>
+                                    <form action="{{ url_for('delete_brand', brand_id=brand.id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button class="btn btn-sm btn-danger">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSockets">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSockets" aria-expanded="false" aria-controls="collapseSockets">
+                    🔌 Socket Types
+                </button>
+            </h2>
+            <div id="collapseSockets" class="accordion-collapse collapse" aria-labelledby="headingSockets" data-bs-parent="#classificatorAccordion">
+                <div class="accordion-body">
+                    <form method="POST" class="mb-3">
+                        {{ socket_form.hidden_tag() }}
+                        <input type="hidden" name="form-name" value="socket">
+
+                        <div class="mb-3">
+                            {{ socket_form.name.label(class="form-label") }}
+                            {{ socket_form.name(class="form-control") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            ➕ Add Socket Type
+                        </button>
+                    </form>
+
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for socket in sockets %}
+                            <tr>
+                                <td>{{ socket.name }}</td>
+                                <td>
+                                    <form action="{{ url_for('delete_socket_type', socket_type_id=socket.id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button class="btn btn-sm btn-danger">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMemory">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMemory" aria-expanded="false" aria-controls="collapseMemory">
+                    🧠 Memory Types
+                </button>
+            </h2>
+            <div id="collapseMemory" class="accordion-collapse collapse" aria-labelledby="headingMemory" data-bs-parent="#classificatorAccordion">
+                <div class="accordion-body">
+
+                    <form method="POST" class="mb-3">
+                        {{ memory_form.hidden_tag() }}
+                        <input type="hidden" name="form-name" value="memory">
+
+                        <div class="mb-3">
+                            {{ memory_form.name.label(class="form-label") }}
+                            {{ memory_form.name(class="form-control") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            ➕ Add Memory Type
+                        </button>
+                    </form>
+
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for memory in memories %}
+                            <tr>
+                                <td>{{ memory.name }}</td>
+                                <td>
+                                    <form action="{{ url_for('delete_memory_type', memory_type_id=memory.id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button class="btn btn-sm btn-danger">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
