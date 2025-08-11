@@ -1,7 +1,10 @@
-from flask_restx import Api, Resource, fields, Namespace
+from flask_restx import Resource, Namespace
+
+from .common_models import register_common_models
 
 
 classificators_ns = Namespace('classificators', description='Операции с классификаторами')
+models = register_common_models(classificators_ns)
 
 
 @classificators_ns.route('/')

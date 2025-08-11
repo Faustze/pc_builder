@@ -1,8 +1,11 @@
 from flask_restx import Namespace, Resource, fields
 from flask_restx.reqparse import RequestParser
 
+from .common_models import register_common_models
+
 
 components_ns = Namespace('components', description='Операции с компонентами')
+models = register_common_models(components_ns)
 
 components_parser = RequestParser()
 components_parser.add_argument('component_type', type=str, help='Тип компонента для фильтрации')
