@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Assemblies{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Assemblies</h2>
+    <a href="{{ url_for('add_assembly') }}" class="btn btn-primary">
+      + Add Assembly
+    </a>
+  </div>
+
+  {% if assemblies %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for assembly in assemblies %}
+        {% set components = assembly.components %}
+        {% set mb = components | selectattr("component_type", "equalto", "motherboard") | first %}
+        {% set cpu = components | selectattr("component_type", "equalto", "cpu") | first %}
+        {% set gpu = components | selectattr("component_type", "equalto", "gpu") | first %}
+        {% set soundcard = components | selectattr("component_type", "equalto", "soundcard") | first %}
+        {% set ram = components | selectattr("component_type", "equalto", "ram") | first %}
+
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ assembly.name }}</h5>
+
+              <ul class="list-unstyled mb-3 flex-grow-1">
+                <li><strong>Motherboard:</strong> {{ mb.brand_rel.name ~ ' ' ~ mb.model if mb else '-' }}</li>
+                <li><strong>CPU:</strong> {{ cpu.brand_rel.name ~ ' ' ~ cpu.model if cpu else '-' }}</li>
+                <li><strong>GPU:</strong>
+                  {% if gpu %}
+                    {{ gpu.brand_rel.name ~ ' ' ~ gpu.model }}
+                  {% else %}
+                    {% if mb and mb.has_integrated_graphics %}
+                      Integrated GPU (MB)
+                    {% elif cpu and cpu.has_integrated_graphics %}
+                      Integrated GPU (CPU)
+                    {% else %}
+                      -
+                    {% endif %}
+                  {% endif %}
+                </li>
+                <li><strong>Sound Card:</strong> {{ soundcard.brand_rel.name ~ ' ' ~ soundcard.model if soundcard else '-' }}</li>
+                <li><strong>RAM:</strong>
+                  {% if ram %}
+                    {{ ram.brand_rel.name ~ ' ' ~ ram.model }} ({{ ram.capacity }}GB)
+                  {% else %}
+                    -
+                  {% endif %}
+                </li>
+              </ul>
+
+              <small class="text-muted mb-3">
+                Created: {{ assembly.created_at.strftime('%Y-%m-%d %H:%M') if assembly.created_at else 'N/A' }}<br>
+                Updated: {{ assembly.updated_at.strftime('%Y-%m-%d %H:%M') if assembly.updated_at else 'N/A' }}
+              </small>
+
+              <a href="{{ url_for('get_assembly', assembly_id=assembly.id) }}" class="btn btn-sm btn-info mt-auto align-self-start">
+                More details
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-muted">No assemblies found.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+alembic/__pycache__/
+.env
+.flaskenv
+venv/
+.idea/
