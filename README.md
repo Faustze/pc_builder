@@ -17,7 +17,7 @@ pc_builder/
 ├── requirements.txt             # Версии зависимостей
 ├── run.py                       # Точка входа
 └── venv/                        # Виртуальное окружение (если не Docker)
-``
+```
 
 ## Что нужно сделать перед запуском (обязательно прочти!)
 
@@ -172,3 +172,4 @@ alembic revision -m "описание"
 ```bash
 alembic upgrade head
 ```
+
