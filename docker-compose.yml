@@ -20,6 +20,3 @@ services:
       - db
     volumes:
       - .:/app
-
-volumes:
-  pgdata:

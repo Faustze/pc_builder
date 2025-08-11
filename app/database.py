@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
 
+
 engine = create_engine(
     url=settings.database_url_psycopg2,
     echo=False,

@@ -30,7 +30,6 @@ def create_app():
             engine.echo = True
 
         engine.echo = False
-        print("Hi from Alembic!")
         seed_data()
 
     init_routes(app)
