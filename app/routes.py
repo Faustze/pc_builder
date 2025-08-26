@@ -16,8 +16,8 @@ from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload, with_polymorphic
 
-from .database import session_factory
-from .forms import (
+from app.database import session_factory
+from app.forms import (
     AssemblySelectForm,
     BrandForm,
     CPUForm,
@@ -29,7 +29,7 @@ from .forms import (
     SoundcardForm,
     get_memory_type_choices,
 )
-from .models import (
+from app.models import (
     CPU,
     GPU,
     RAM,

@@ -1,5 +1,5 @@
-from .database import session_factory
-from .models import (
+from app.database import session_factory
+from app.models import (
     CPU,
     GPU,
     RAM,

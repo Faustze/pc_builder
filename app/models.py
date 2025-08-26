@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String, text
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .database import Base
+from app.database import Base
 
 
 class AssemblyComponentAssociation(Base):

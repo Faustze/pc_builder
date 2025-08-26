@@ -3,15 +3,15 @@ import os
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
-from .config import settings
-from .database import engine
-from .database_data import seed_data
-from .models import Base
-from .routes import init_routes
-from .api import init_api
+from app.config import settings
+from app.database import engine
+from app.database_data import seed_data
+from app.models import Base
+from app.routes import init_routes
+from app.api import init_api
+
 
 csrf = CSRFProtect()
-
 
 def create_app():
     app = Flask(__name__)
@@ -22,7 +22,7 @@ def create_app():
 
     with app.app_context():
         if os.getenv("USE_ALEMBIC", False):
-            from .database import drop_all_tables_cascade
+            from app.database import drop_all_tables_cascade
 
             drop_all_tables_cascade()
             engine.echo = False

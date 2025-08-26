@@ -3,13 +3,14 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-pc_builder_db}
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
   web:
     build: .
     ports:
@@ -20,3 +21,6 @@ services:
       - db
     volumes:
       - .:/app
+
+volumes:
+  pgdata:

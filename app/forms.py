@@ -9,8 +9,8 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, InputRequired, NumberRange
 
-from .database import session_factory
-from .models import Brand, MemoryType, SocketType
+from app.database import session_factory
+from app.models import Brand, MemoryType, SocketType
 
 
 def get_brand_choices_for(component_type: str):
