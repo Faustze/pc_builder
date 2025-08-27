@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 
-from .common_models import register_common_models
+from app.api.components import status_code
+from app.common_models import register_common_models
 
 assemblies_ns = Namespace("assemblies", description="Операции со сборками")
 models = register_common_models(assemblies_ns)
@@ -54,7 +55,7 @@ class AssemblyAddResource(Resource):
 
     @assemblies_ns.doc("add_assembly")
     @assemblies_ns.expect(assembly_input)
-    @assemblies_ns.marshal_with(assembly_model, code=201)
+    @assemblies_ns.marshal_with(assembly_model, code=status_code["201"])
     @assemblies_ns.response(201, "Сборка успешно создана")
     @assemblies_ns.response(400, "Ошибка валидации или несовместимые компоненты")
     def post(self):

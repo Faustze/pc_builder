@@ -8,17 +8,17 @@ load_dotenv(dotenv_path=env_path)
 
 
 class Settings(BaseSettings):
-    DEBUG: bool | None
-    SECRET_KEY: str | None
+    DEBUG: bool | None = None
+    SECRET_KEY: str | None = None
 
-    FLASK_APP: str | None
-    FLASK_ENV: str | None
+    FLASK_APP: str | None = None
+    FLASK_ENV: str | None = None
 
-    DB_HOST: str | None
-    DB_PORT: int | None
-    DB_USER: str | None
-    DB_PASS: str | None
-    DB_NAME: str | None
+    DB_HOST: str | None = None
+    DB_PORT: int | None = None
+    DB_USER: str | None = None
+    DB_PASS: str | None = None
+    DB_NAME: str | None = None
 
     USE_ALEMBIC: bool = False
 

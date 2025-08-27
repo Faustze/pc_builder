@@ -1,7 +1,9 @@
+from http import HTTPStatus
+
 from flask_restx import Namespace, Resource, fields
 from flask_restx.reqparse import RequestParser
 
-from .common_models import register_common_models
+from app.common_models import register_common_models
 
 components_ns = Namespace("components", description="Операции с компонентами")
 models = register_common_models(components_ns)
@@ -9,6 +11,14 @@ models = register_common_models(components_ns)
 components_parser = RequestParser()
 components_parser.add_argument("component_type", type=str, help="Тип компонента для фильтрации")
 components_parser.add_argument("brand_id", type=int, help="ID бренда для фильтрации")
+
+status_code: dict = {
+    "201": HTTPStatus.CREATED,
+    "400": HTTPStatus.BAD_REQUEST,
+    "404": HTTPStatus.NOT_FOUND,
+    "409": HTTPStatus.CONFLICT,
+    "500": HTTPStatus.INTERNAL_SERVER_ERROR,
+}
 
 base_component_model = components_ns.model(
     "BaseComponent",
@@ -152,7 +162,7 @@ class MotherboardAddResource(Resource):
 
     @components_ns.doc("add_motherboard")
     @components_ns.expect(motherboard_input)
-    @components_ns.marshal_with(motherboard_model, code=201)
+    @components_ns.marshal_with(motherboard_model, code=status_code["201"])
     @components_ns.response(201, "Материнская плата успешно добавлена")
     @components_ns.response(400, "Ошибка валидации")
     @components_ns.response(409, "Конфликт - компонент уже существует")
@@ -171,7 +181,7 @@ class CPUAddResource(Resource):
 
     @components_ns.doc("add_cpu")
     @components_ns.expect(cpu_input)
-    @components_ns.marshal_with(cpu_model, code=201)
+    @components_ns.marshal_with(cpu_model, code=status_code["201"])
     @components_ns.response(201, "Процессор успешно добавлен")
     @components_ns.response(400, "Ошибка валидации")
     def post(self):
@@ -189,7 +199,7 @@ class GPUAddResource(Resource):
 
     @components_ns.doc("add_gpu")
     @components_ns.expect(gpu_input)
-    @components_ns.marshal_with(gpu_model, code=201)
+    @components_ns.marshal_with(gpu_model, code=status_code["201"])
     @components_ns.response(201, "Видеокарта успешно добавлена")
     @components_ns.response(400, "Ошибка валидации")
     def post(self):
@@ -207,7 +217,7 @@ class RAMAddResource(Resource):
 
     @components_ns.doc("add_ram")
     @components_ns.expect(ram_input)
-    @components_ns.marshal_with(ram_model, code=201)
+    @components_ns.marshal_with(ram_model, code=status_code["201"])
     @components_ns.response(201, "Оперативная память успешно добавлена")
     @components_ns.response(400, "Ошибка валидации")
     def post(self):
@@ -225,7 +235,7 @@ class SoundcardAddResource(Resource):
 
     @components_ns.doc("add_soundcard")
     @components_ns.expect(soundcard_input)
-    @components_ns.marshal_with(soundcard_model, code=201)
+    @components_ns.marshal_with(soundcard_model, code=status_code["201"])
     @components_ns.response(201, "Звуковая карта успешно добавлена")
     @components_ns.response(400, "Ошибка валидации")
     def post(self):
