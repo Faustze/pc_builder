@@ -36,8 +36,13 @@ This is a Flask web application for assembling and managing PC components: mothe
 
 ### 2. Launch docker image
 
+On Linux/MacOS:
 ```bash
 sudo docker-compose up --build
+```
+or Windows:
+```powershell
+docker-compose up --build
 ```
 
 ### 3. Follow the link

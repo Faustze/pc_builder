@@ -1,18 +1,21 @@
-"""init
+"""
+init
 
 Revision ID: 9b29737a8051
-Revises: 
+Revises:
 Create Date: 2025-08-02 19:55:48.036037
 
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
+from typing import Union
 
 import sqlalchemy as sa
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '9b29737a8051'
+revision: str = "9b29737a8051"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -92,9 +95,7 @@ def upgrade() -> None:
         sa.Column("component_id", sa.Integer(), nullable=False),
         sa.Column("quantity", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["assembly_id"], ["assemblies.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["component_id"], ["components.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["component_id"], ["components.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("assembly_id", "component_id"),
     )
     op.create_table(

@@ -3,7 +3,6 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
 
-
 engine = create_engine(
     url=settings.database_url_psycopg2,
     echo=False,
@@ -16,9 +15,20 @@ session_factory = sessionmaker(engine, autoflush=False, autocommit=False, future
 
 class BaseModel(DeclarativeBase):
     repr_cols_num = 3
-    repr_cols = tuple()
+    repr_cols = ()
 
     def __repr__(self):
+        """
+        Return a string representation of the object containing selected model attributes.
+        Generates a string in the format `<Class: attribute=value,...>`, where:
+            - Class is the model class name (e.g., `Motherboard`, `CPU`).
+            - Attributes are chosen from:
+        1. The explicit list `repr_cols` (e.g., `repr_cols = ['id', 'socket_type_id']`),
+        2. The first `repr_cols_num` attributes if `repr_cols` is not defined.
+
+        Example output:
+            `<Motherboard id=1, socket_type_id=2, ...>`
+        """
         cols = []
         for idx, col in enumerate(self.__table__.columns.keys()):
             if col in self.repr_cols or idx < self.repr_cols_num:

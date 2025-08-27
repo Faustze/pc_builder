@@ -1,10 +1,9 @@
 import json
-import xml.etree.ElementTree as Et
+import xml.etree.ElementTree as ET
 
 from flask import (
     Response,
     abort,
-    current_app,
     flash,
     redirect,
     render_template,
@@ -12,8 +11,9 @@ from flask import (
     url_for,
 )
 from flask_wtf.csrf import generate_csrf
+from loguru import logger
 from sqlalchemy import delete
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import joinedload, with_polymorphic
 
 from app.database import session_factory
@@ -60,9 +60,7 @@ def populate_component_choices(form, session, selected_ids=None):
         )
         for mb in motherboards
     ]
-    form.motherboard_id.choices = move_selected_first(
-        mb_choices, selected_ids.get("motherboard_id")
-    )
+    form.motherboard_id.choices = move_selected_first(mb_choices, selected_ids.get("motherboard_id"))
 
     cpus = session.query(CPU).all()
     cpu_choices = [
@@ -76,31 +74,22 @@ def populate_component_choices(form, session, selected_ids=None):
     form.cpu_id.choices = move_selected_first(cpu_choices, selected_ids.get("cpu_id"))
 
     gpus = session.query(GPU).all()
-    gpu_choices = [
-        (gpu.id, f"{gpu.brand_rel.name} {gpu.model} | VRAM: {gpu.vram}GB")
-        for gpu in gpus
-    ]
+    gpu_choices = [(gpu.id, f"{gpu.brand_rel.name} {gpu.model} | VRAM: {gpu.vram}GB") for gpu in gpus]
     form.gpu_id.choices = move_selected_first(gpu_choices, selected_ids.get("gpu_id"))
 
     rams = session.query(RAM).all()
     ram_choices = [
         (
             ram.id,
-            f"{ram.brand_rel.name} {ram.model} | {ram.memory_type_rel.name} | "
-            f"{ram.capacity}GB @ {ram.frequency}MHz",
+            f"{ram.brand_rel.name} {ram.model} | {ram.memory_type_rel.name} | {ram.capacity}GB @ {ram.frequency}MHz",
         )
         for ram in rams
     ]
     form.ram_id.choices = move_selected_first(ram_choices, selected_ids.get("ram_id"))
 
     soundcards = session.query(Soundcard).all()
-    sound_choices = [
-        (sc.id, f"{sc.brand_rel.name} {sc.model} | Channels: {sc.channels_quantity}")
-        for sc in soundcards
-    ]
-    form.soundcard_id.choices = move_selected_first(
-        sound_choices, selected_ids.get("soundcard_id")
-    )
+    sound_choices = [(sc.id, f"{sc.brand_rel.name} {sc.model} | Channels: {sc.channels_quantity}") for sc in soundcards]
+    form.soundcard_id.choices = move_selected_first(sound_choices, selected_ids.get("soundcard_id"))
 
 
 def check_compatibility(form, session):
@@ -114,22 +103,17 @@ def check_compatibility(form, session):
     cpu = session.get(Component, cpu_id) if cpu_id else None
     ram = session.get(Component, ram_id) if ram_id else None
 
-    if cpu and motherboard:
-        if cpu.socket_type_id != motherboard.socket_type_id:
-            errors.append("❌ CPU and Motherboard have incompatible sockets.")
+    if cpu and motherboard and cpu.socket_type_id != motherboard.socket_type_id:
+        errors.append("❌ CPU and Motherboard have incompatible sockets.")
 
-    if ram and motherboard:
-        if ram.memory_type_id != motherboard.memory_type_id:
-            errors.append("❌ RAM and Motherboard have incompatible memory types.")
+    if ram and motherboard and ram.memory_type_id != motherboard.memory_type_id:
+        errors.append("❌ RAM and Motherboard have incompatible memory types.")
 
     return len(errors) == 0, errors
 
 
 def get_selected_components_from_form(form, component_names):
-    return [
-        (getattr(form, f"{name}_id").data, getattr(form, f"{name}_quantity").data)
-        for name in component_names
-    ]
+    return [(getattr(form, f"{name}_id").data, getattr(form, f"{name}_quantity").data) for name in component_names]
 
 
 def populate_assembly_components(session, assembly, selected_components):
@@ -154,22 +138,16 @@ def init_routes(app):
         component_type_filter = request.args.get("component_type")
         brand_id_filter = request.args.get("brand_id")
 
-        component_entities = with_polymorphic(
-            Component, [Motherboard, CPU, GPU, RAM, Soundcard]
-        )
+        component_entities = with_polymorphic(Component, [Motherboard, CPU, GPU, RAM, Soundcard])
 
         with session_factory() as session:
             query = session.query(component_entities)
 
             if component_type_filter:
-                query = query.filter(
-                    component_entities.component_type == component_type_filter
-                )
+                query = query.filter(component_entities.component_type == component_type_filter)
 
             if brand_id_filter:
-                query = query.filter(
-                    component_entities.brand_id == int(brand_id_filter)
-                )
+                query = query.filter(component_entities.brand_id == int(brand_id_filter))
 
             components = query.order_by(
                 component_entities.component_type,
@@ -198,12 +176,7 @@ def init_routes(app):
         form = MotherboardForm()
 
         with session_factory() as session:
-            motherboard_brands = (
-                session.query(Brand)
-                .filter_by(component_type="motherboard")
-                .order_by(Brand.name)
-                .all()
-            )
+            motherboard_brands = session.query(Brand).filter_by(component_type="motherboard").order_by(Brand.name).all()
             socket_types = session.query(SocketType).all()
             memory_types = session.query(MemoryType).all()
 
@@ -236,11 +209,11 @@ def init_routes(app):
                     )
                 else:
                     flash(f"Database error: {e}", "danger")
-            except Exception as e:
+            except SQLAlchemyError as e:
                 flash(f"Error: {e}", "danger")
         else:
-            print("❌ Form validation failed")
-            print(form.errors)
+            logger.info("❌ Form validation failed")
+            logger.error(form.errors)
 
         return render_template("components/add_component_motherboard.html", form=form)
 
@@ -248,12 +221,7 @@ def init_routes(app):
     def add_component_cpu():
         form = CPUForm()
         with session_factory() as session:
-            cpu_brands = (
-                session.query(Brand)
-                .filter_by(component_type="cpu")
-                .order_by(Brand.name)
-                .all()
-            )
+            cpu_brands = session.query(Brand).filter_by(component_type="cpu").order_by(Brand.name).all()
             socket_types = session.query(SocketType).all()
 
             form.brand_id.choices = [(b.id, b.name) for b in cpu_brands]
@@ -266,25 +234,21 @@ def init_routes(app):
                         cpu = CPU(
                             brand_id=int(form.brand_id.data),
                             model=form.model.data,
-                            quantity=(
-                                int(form.quantity.data) if form.quantity.data else 1
-                            ),
+                            quantity=(int(form.quantity.data) if form.quantity.data else 1),
                             socket_type_id=int(form.socket_type_id.data),
                             cores=int(form.cores.data),
                             threads=int(form.threads.data),
-                            has_integrated_graphics=bool(
-                                form.has_integrated_graphics.data
-                            ),
+                            has_integrated_graphics=bool(form.has_integrated_graphics.data),
                         )
                         session.add(cpu)
                         session.commit()
                         flash("CPU added successfully", "success")
                         return redirect(url_for("get_components_page"))
-                except Exception as e:
+                except SQLAlchemyError as e:
                     flash(f"Error: {e}", "danger")
             else:
-                print("❌ Form validation failed")
-                print(form.errors)
+                logger.info("❌ Form validation failed")
+                logger.error(form.errors)
 
         return render_template("components/add_component_cpu.html", form=form)
 
@@ -293,12 +257,7 @@ def init_routes(app):
         form = GPUForm()
 
         with session_factory() as session:
-            gpu_brands = (
-                session.query(Brand)
-                .filter_by(component_type="gpu")
-                .order_by(Brand.name)
-                .all()
-            )
+            gpu_brands = session.query(Brand).filter_by(component_type="gpu").order_by(Brand.name).all()
 
             form.brand_id.choices = [(b.id, b.name) for b in gpu_brands]
 
@@ -309,20 +268,18 @@ def init_routes(app):
                         gpu = GPU(
                             brand_id=int(form.brand_id.data),
                             model=form.model.data,
-                            quantity=(
-                                int(form.quantity.data) if form.quantity.data else 1
-                            ),
+                            quantity=(int(form.quantity.data) if form.quantity.data else 1),
                             vram=int(form.vram.data),
                         )
                         session.add(gpu)
                         session.commit()
                         flash("GPU added successfully", "success")
                         return redirect(url_for("get_components_page"))
-                except Exception as e:
+                except SQLAlchemyError as e:
                     flash(f"Error: {e}", "danger")
             else:
-                print("❌ Form validation failed")
-                print(form.errors)
+                logger.info("❌ Form validation failed")
+                logger.error(form.errors)
 
         return render_template("components/add_component_gpu.html", form=form)
 
@@ -331,12 +288,7 @@ def init_routes(app):
         form = RAMForm()
 
         with session_factory() as session:
-            ram_brands = (
-                session.query(Brand)
-                .filter_by(component_type="ram")
-                .order_by(Brand.name)
-                .all()
-            )
+            ram_brands = session.query(Brand).filter_by(component_type="ram").order_by(Brand.name).all()
             memory_types = session.query(MemoryType).all()
             form.brand_id.choices = [(b.id, b.name) for b in ram_brands]
             form.memory_type_id.choices = [(m.id, m.name) for m in memory_types]
@@ -357,11 +309,11 @@ def init_routes(app):
                         session.commit()
                         flash("RAM added successfully", "success")
                         return redirect(url_for("get_components_page"))
-                except Exception as e:
+                except SQLAlchemyError as e:
                     flash(f"Error: {e}", "danger")
             else:
-                print("❌ Form validation failed")
-                print(form.errors)
+                logger.info("❌ Form validation failed")
+                logger.error(form.errors)
 
         return render_template("components/add_component_ram.html", form=form)
 
@@ -370,12 +322,7 @@ def init_routes(app):
         form = SoundcardForm()
 
         with session_factory() as session:
-            soundcard_brands = (
-                session.query(Brand)
-                .filter_by(component_type="soundcard")
-                .order_by(Brand.name)
-                .all()
-            )
+            soundcard_brands = session.query(Brand).filter_by(component_type="soundcard").order_by(Brand.name).all()
             form.brand_id.choices = [(b.id, b.name) for b in soundcard_brands]
 
         if request.method == "POST":
@@ -385,20 +332,18 @@ def init_routes(app):
                         soundcard = Soundcard(
                             brand_id=int(form.brand_id.data),
                             model=form.model.data,
-                            quantity=(
-                                int(form.quantity.data) if form.quantity.data else 1
-                            ),
+                            quantity=(int(form.quantity.data) if form.quantity.data else 1),
                             channels_quantity=int(form.channels_quantity.data),
                         )
                         session.add(soundcard)
                         session.commit()
                         flash("Soundcard added successfully", "success")
                         return redirect(url_for("get_components_page"))
-                except Exception as e:
+                except SQLAlchemyError as e:
                     flash(f"Error: {e}", "danger")
             else:
-                print("❌ Form validation failed")
-                print(form.errors)
+                logger.info("❌ Form validation failed")
+                logger.error(form.errors)
 
         return render_template("components/add_component_soundcard.html", form=form)
 
@@ -414,10 +359,7 @@ def init_routes(app):
 
             if component.component_type == "motherboard":
                 motherboard_brands = (
-                    session.query(Brand)
-                    .filter_by(component_type="motherboard")
-                    .order_by(Brand.name)
-                    .all()
+                    session.query(Brand).filter_by(component_type="motherboard").order_by(Brand.name).all()
                 )
                 socket_types = session.query(SocketType).order_by(SocketType.name).all()
                 memory_types = session.query(MemoryType).order_by(MemoryType.name).all()
@@ -427,46 +369,26 @@ def init_routes(app):
                 form.brand_id.choices = [(b.id, b.name) for b in motherboard_brands]
 
             elif component.component_type == "cpu":
-                cpu_brands = (
-                    session.query(Brand)
-                    .filter_by(component_type="cpu")
-                    .order_by(Brand.name)
-                    .all()
-                )
+                cpu_brands = session.query(Brand).filter_by(component_type="cpu").order_by(Brand.name).all()
                 socket_types = session.query(SocketType).order_by(SocketType.name).all()
                 form = CPUForm(obj=component)
                 form.socket_type_id.choices = [(s.id, s.name) for s in socket_types]
                 form.brand_id.choices = [(b.id, b.name) for b in cpu_brands]
 
             elif component.component_type == "ram":
-                ram_brands = (
-                    session.query(Brand)
-                    .filter_by(component_type="ram")
-                    .order_by(Brand.name)
-                    .all()
-                )
+                ram_brands = session.query(Brand).filter_by(component_type="ram").order_by(Brand.name).all()
                 memory_types = session.query(MemoryType).order_by(MemoryType.name).all()
                 form = RAMForm(obj=component)
                 form.memory_type_id.choices = [(m.id, m.name) for m in memory_types]
                 form.brand_id.choices = [(b.id, b.name) for b in ram_brands]
 
             elif component.component_type == "gpu":
-                gpu_brands = (
-                    session.query(Brand)
-                    .filter_by(component_type="gpu")
-                    .order_by(Brand.name)
-                    .all()
-                )
+                gpu_brands = session.query(Brand).filter_by(component_type="gpu").order_by(Brand.name).all()
                 form = GPUForm(obj=component)
                 form.brand_id.choices = [(b.id, b.name) for b in gpu_brands]
 
             elif component.component_type == "soundcard":
-                soundcard_brands = (
-                    session.query(Brand)
-                    .filter_by(component_type="soundcard")
-                    .order_by(Brand.name)
-                    .all()
-                )
+                soundcard_brands = session.query(Brand).filter_by(component_type="soundcard").order_by(Brand.name).all()
                 form = SoundcardForm(obj=component)
                 form.brand_id.choices = [(b.id, b.name) for b in soundcard_brands]
 
@@ -476,9 +398,9 @@ def init_routes(app):
                     session.commit()
                     flash("The component has been edited successfully.", "success")
                     return redirect(url_for("get_components_page"))
-                except Exception as e:
+                except SQLAlchemyError as e:
                     session.rollback()
-                    flash(f"Error while editing: {str(e)}", "danger")
+                    flash(f"Error while editing: {e!s}", "danger")
 
         return render_template(
             "components/edit_component.html",
@@ -502,9 +424,7 @@ def init_routes(app):
                     return redirect(url_for("get_components_page"))
 
                 if component.component_type == "motherboard":
-                    session.execute(
-                        delete(Motherboard).where(Motherboard.id == component.id)
-                    )
+                    session.execute(delete(Motherboard).where(Motherboard.id == component.id))
                 elif component.component_type == "cpu":
                     session.execute(delete(CPU).where(CPU.id == component.id))
                 elif component.component_type == "ram":
@@ -512,17 +432,15 @@ def init_routes(app):
                 elif component.component_type == "gpu":
                     session.execute(delete(GPU).where(GPU.id == component.id))
                 elif component.component_type == "soundcard":
-                    session.execute(
-                        delete(Soundcard).where(Soundcard.id == component.id)
-                    )
+                    session.execute(delete(Soundcard).where(Soundcard.id == component.id))
 
                 session.delete(component)
                 session.commit()
                 flash("The component has been successfully removed.", "success")
-        except Exception as e:
+        except SQLAlchemyError as e:
             session.rollback()
-            flash(f"Error while deleting: {str(e)}", "danger")
-            current_app.logger.error(f"Error while deleting component: {str(e)}")
+            flash(f"Error while deleting: {e!s}", "danger")
+            logger.error(f"Error while deleting component: {e!s}")
 
         return redirect(url_for("get_components_page"))
 
@@ -572,9 +490,7 @@ def init_routes(app):
                         flash("This memory type already exists!", "danger")
                     return redirect(url_for("get_classificators_page"))
 
-            brands = (
-                session.query(Brand).order_by(Brand.component_type, Brand.name).all()
-            )
+            brands = session.query(Brand).order_by(Brand.component_type, Brand.name).all()
             sockets = session.query(SocketType).order_by(SocketType.name).all()
             memories = session.query(MemoryType).order_by(MemoryType.name).all()
 
@@ -609,9 +525,7 @@ def init_routes(app):
                 flash(f"Brand '{brand.name}' deleted successfully!", "success")
         return redirect(url_for("get_classificators_page"))
 
-    @app.route(
-        "/classificators/socket_type_<int:socket_type_id>/delete", methods=["POST"]
-    )
+    @app.route("/classificators/socket_type_<int:socket_type_id>/delete", methods=["POST"])
     def delete_socket_type(socket_type_id):
         with session_factory() as session:
             socket_type = session.get(SocketType, socket_type_id)
@@ -629,9 +543,7 @@ def init_routes(app):
             flash("Socket type deleted successfully.", "success")
             return redirect(url_for("get_classificators_page"))
 
-    @app.route(
-        "/classificators/memory_type_<int:memory_type_id>/delete", methods=["POST"]
-    )
+    @app.route("/classificators/memory_type_<int:memory_type_id>/delete", methods=["POST"])
     def delete_memory_type(memory_type_id):
         with session_factory() as session:
             memory_type = session.get(MemoryType, memory_type_id)
@@ -652,11 +564,7 @@ def init_routes(app):
     @app.route("/assemblies", methods=["GET", "POST"])
     def get_assemblies_page():
         with session_factory() as session:
-            assemblies = (
-                session.query(Assembly)
-                .options(joinedload(Assembly.components_association))
-                .all()
-            )
+            assemblies = session.query(Assembly).options(joinedload(Assembly.components_association)).all()
             return render_template(
                 "assemblies/assemblies.html",
                 assemblies=assemblies,
@@ -689,9 +597,7 @@ def init_routes(app):
                     )
 
                     component_fields = ["motherboard", "cpu", "gpu", "ram", "soundcard"]
-                    selected_components = get_selected_components_from_form(
-                        form, component_fields
-                    )
+                    selected_components = get_selected_components_from_form(form, component_fields)
                     populate_assembly_components(session, assembly, selected_components)
 
                     session.add(assembly)
@@ -700,7 +606,7 @@ def init_routes(app):
                     flash("Assembly created from selected components!", "success")
                     return redirect(url_for("get_assemblies_page"))
 
-                except Exception as e:
+                except SQLAlchemyError as e:
                     session.rollback()
                     flash(f"Failed to create assembly: {e}", "danger")
 
@@ -782,9 +688,7 @@ def init_routes(app):
                 comp_map = {c.component_type: c for c in assembly.components}
 
                 motherboard = comp_map.get("motherboard")
-                form.motherboard_id.data = (
-                    motherboard.id if motherboard is not None else None
-                )
+                form.motherboard_id.data = motherboard.id if motherboard is not None else None
 
                 cpu = comp_map.get("cpu")
                 form.cpu_id.data = cpu.id if cpu is not None else None
@@ -800,15 +704,11 @@ def init_routes(app):
 
                 form.gpu_is_integrated.data = "gpu" not in comp_map
 
-                form.motherboard_quantity.data = (
-                    motherboard.quantity if motherboard is not None else 1
-                )
+                form.motherboard_quantity.data = motherboard.quantity if motherboard is not None else 1
                 form.cpu_quantity.data = cpu.quantity if cpu is not None else 1
                 form.gpu_quantity.data = gpu.quantity if gpu is not None else 1
                 form.ram_quantity.data = ram.quantity if ram is not None else 1
-                form.soundcard_quantity.data = (
-                    soundcard.quantity if soundcard is not None else 1
-                )
+                form.soundcard_quantity.data = soundcard.quantity if soundcard is not None else 1
 
             elif request.method == "POST" and form.validate_on_submit():
                 compatible, compatibility_errors = check_compatibility(form, session)
@@ -830,9 +730,7 @@ def init_routes(app):
                     assembly.components.clear()
 
                     component_fields = ["motherboard", "cpu", "gpu", "ram", "soundcard"]
-                    selected_components = get_selected_components_from_form(
-                        form, component_fields
-                    )
+                    selected_components = get_selected_components_from_form(form, component_fields)
                     populate_assembly_components(session, assembly, selected_components)
 
                     session.add(assembly)
@@ -841,7 +739,7 @@ def init_routes(app):
                     flash("Assembly updated succesfully!", "success")
                     return redirect(url_for("get_assemblies_page"))
 
-                except Exception as e:
+                except SQLAlchemyError as e:
                     session.rollback()
                     flash(f"Failed to update assembly: {e}", "danger")
 
@@ -861,12 +759,10 @@ def init_routes(app):
             if not assembly:
                 abort(404, description="Assembly not found")
 
-            root = Et.Element(
-                "assembly", attrib={"id": str(assembly.id), "name": assembly.name}
-            )
+            root = ET.Element("assembly", attrib={"id": str(assembly.id), "name": assembly.name})
 
             for component in assembly.components:
-                comp_el = Et.SubElement(
+                comp_el = ET.SubElement(
                     root,
                     "component",
                     attrib={
@@ -877,46 +773,32 @@ def init_routes(app):
                 )
 
                 if component.component_type == "cpu":
-                    Et.SubElement(comp_el, "cores").text = str(component.cores)
-                    Et.SubElement(comp_el, "threads").text = str(component.threads)
-                    Et.SubElement(comp_el, "integrated_graphics").text = str(
-                        component.has_integrated_graphics
-                    )
+                    ET.SubElement(comp_el, "cores").text = str(component.cores)
+                    ET.SubElement(comp_el, "threads").text = str(component.threads)
+                    ET.SubElement(comp_el, "integrated_graphics").text = str(component.has_integrated_graphics)
 
                 elif component.component_type == "motherboard":
-                    Et.SubElement(comp_el, "socket").text = (
-                        component.socket_type_rel.name
-                    )
-                    Et.SubElement(comp_el, "memory_type").text = (
-                        component.memory_type_rel.name
-                    )
-                    Et.SubElement(comp_el, "integrated_graphics").text = str(
-                        component.has_integrated_graphics
-                    )
+                    ET.SubElement(comp_el, "socket").text = component.socket_type_rel.name
+                    ET.SubElement(comp_el, "memory_type").text = component.memory_type_rel.name
+                    ET.SubElement(comp_el, "integrated_graphics").text = str(component.has_integrated_graphics)
 
                 elif component.component_type == "ram":
-                    Et.SubElement(comp_el, "capacity").text = str(component.capacity)
-                    Et.SubElement(comp_el, "frequency").text = str(component.frequency)
-                    Et.SubElement(comp_el, "memory_type").text = (
-                        component.memory_type_rel.name
-                    )
+                    ET.SubElement(comp_el, "capacity").text = str(component.capacity)
+                    ET.SubElement(comp_el, "frequency").text = str(component.frequency)
+                    ET.SubElement(comp_el, "memory_type").text = component.memory_type_rel.name
 
                 elif component.component_type == "gpu":
-                    Et.SubElement(comp_el, "vram").text = str(component.vram)
+                    ET.SubElement(comp_el, "vram").text = str(component.vram)
 
                 elif component.component_type == "soundcard":
-                    Et.SubElement(comp_el, "channels").text = str(
-                        component.channels_quantity
-                    )
+                    ET.SubElement(comp_el, "channels").text = str(component.channels_quantity)
 
-            xml_str = Et.tostring(root, encoding="utf-8", method="xml")
+            xml_str = ET.tostring(root, encoding="utf-8", method="xml")
 
             return Response(
                 xml_str,
                 mimetype="application/xml",
-                headers={
-                    "Content-Disposition": f"attachment;filename=assembly_{assembly_id}.xml"
-                },
+                headers={"Content-Disposition": f"attachment;filename=assembly_{assembly_id}.xml"},
             )
 
     @app.route("/assemblies/<int:assembly_id>/download/json")
@@ -972,9 +854,7 @@ def init_routes(app):
             return Response(
                 json_str,
                 mimetype="application/json",
-                headers={
-                    "Content-Disposition": f"attachment;filename=assembly_{assembly_id}.json"
-                },
+                headers={"Content-Disposition": f"attachment;filename=assembly_{assembly_id}.json"},
             )
 
     @app.route("/assemblies/<int:assembly_id>/download/txt")
@@ -995,16 +875,12 @@ def init_routes(app):
                 if component.component_type == "cpu":
                     lines.append(f"    Cores: {component.cores}")
                     lines.append(f"    Threads: {component.threads}")
-                    lines.append(
-                        f"    Integrated Graphics: {'Yes' if component.has_integrated_graphics else 'No'}"
-                    )
+                    lines.append(f"    Integrated Graphics: {'Yes' if component.has_integrated_graphics else 'No'}")
 
                 elif component.component_type == "motherboard":
                     lines.append(f"    Socket: {component.socket_type_rel.name}")
                     lines.append(f"    Memory Type: {component.memory_type_rel.name}")
-                    lines.append(
-                        f"    Integrated Graphics: {'Yes' if component.has_integrated_graphics else 'No'}"
-                    )
+                    lines.append(f"    Integrated Graphics: {'Yes' if component.has_integrated_graphics else 'No'}")
 
                 elif component.component_type == "ram":
                     lines.append(f"    Capacity: {component.capacity} GB")
@@ -1022,7 +898,5 @@ def init_routes(app):
             return Response(
                 txt_output,
                 mimetype="text/plain",
-                headers={
-                    "Content-Disposition": f"attachment; filename=assembly_{assembly_id}.txt"
-                },
+                headers={"Content-Disposition": f"attachment; filename=assembly_{assembly_id}.txt"},
             )

@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import ClassVar
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, text
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -10,18 +11,12 @@ from app.database import Base
 class AssemblyComponentAssociation(Base):
     __tablename__ = "assembly_component_association"
 
-    assembly_id: Mapped[int] = mapped_column(
-        ForeignKey("assemblies.id", ondelete="CASCADE"), primary_key=True
-    )
-    component_id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
+    assembly_id: Mapped[int] = mapped_column(ForeignKey("assemblies.id", ondelete="CASCADE"), primary_key=True)
+    component_id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
 
     assembly: Mapped["Assembly"] = relationship(back_populates="components_association")
-    component: Mapped["Component"] = relationship(
-        back_populates="assemblies_association"
-    )
+    component: Mapped["Component"] = relationship(back_populates="assemblies_association")
 
 
 class MemoryType(Base):
@@ -31,9 +26,7 @@ class MemoryType(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
     rams: Mapped[list["RAM"]] = relationship(back_populates="memory_type_rel")
-    motherboards: Mapped[list["Motherboard"]] = relationship(
-        back_populates="memory_type_rel"
-    )
+    motherboards: Mapped[list["Motherboard"]] = relationship(back_populates="memory_type_rel")
 
 
 class SocketType(Base):
@@ -43,9 +36,7 @@ class SocketType(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
     cpus: Mapped[list["CPU"]] = relationship(back_populates="socket_type_rel")
-    motherboards: Mapped[list["Motherboard"]] = relationship(
-        back_populates="socket_type_rel"
-    )
+    motherboards: Mapped[list["Motherboard"]] = relationship(back_populates="socket_type_rel")
 
 
 class Brand(Base):
@@ -64,13 +55,11 @@ class Assembly(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("TIMEZONE('utc', now())")
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("TIMEZONE('utc', now())"))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=text("TIMEZONE('utc', now())"),
-        onupdate=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     components_association: Mapped[list["AssemblyComponentAssociation"]] = relationship(
@@ -88,29 +77,23 @@ class Component(Base):
     __tablename__ = "components"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    brand_id: Mapped[int] = mapped_column(
-        ForeignKey("brands.id", ondelete="CASCADE"), nullable=False
-    )
+    brand_id: Mapped[int] = mapped_column(ForeignKey("brands.id", ondelete="CASCADE"), nullable=False)
     model: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
     component_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("TIMEZONE('utc', now())")
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("TIMEZONE('utc', now())"))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=text("TIMEZONE('utc', now())"),
-        onupdate=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(UTC),
     )
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_on": component_type,
         "polymorphic_identity": "component",
     }
 
-    brand_rel: Mapped["Brand"] = relationship(
-        back_populates="components", lazy="joined"
-    )
+    brand_rel: Mapped["Brand"] = relationship(back_populates="components", lazy="joined")
 
     assemblies_association: Mapped[list["AssemblyComponentAssociation"]] = relationship(
         back_populates="component",
@@ -122,25 +105,15 @@ class Component(Base):
 class Motherboard(Component):
     __tablename__ = "motherboards"
 
-    id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
-    socket_type_id: Mapped[int] = mapped_column(
-        ForeignKey("socket_types.id"), nullable=False
-    )
-    memory_type_id: Mapped[int] = mapped_column(
-        ForeignKey("memory_types.id"), nullable=False
-    )
+    id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
+    socket_type_id: Mapped[int] = mapped_column(ForeignKey("socket_types.id"), nullable=False)
+    memory_type_id: Mapped[int] = mapped_column(ForeignKey("memory_types.id"), nullable=False)
     has_integrated_graphics: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    socket_type_rel: Mapped["SocketType"] = relationship(
-        back_populates="motherboards", lazy="joined"
-    )
-    memory_type_rel: Mapped["MemoryType"] = relationship(
-        back_populates="motherboards", lazy="joined"
-    )
+    socket_type_rel: Mapped["SocketType"] = relationship(back_populates="motherboards", lazy="joined")
+    memory_type_rel: Mapped["MemoryType"] = relationship(back_populates="motherboards", lazy="joined")
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "motherboard",
     }
 
@@ -148,21 +121,15 @@ class Motherboard(Component):
 class CPU(Component):
     __tablename__ = "cpus"
 
-    id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
-    socket_type_id: Mapped[int] = mapped_column(
-        ForeignKey("socket_types.id"), nullable=False
-    )
+    id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
+    socket_type_id: Mapped[int] = mapped_column(ForeignKey("socket_types.id"), nullable=False)
     cores: Mapped[int] = mapped_column(nullable=False)
     threads: Mapped[int] = mapped_column(nullable=False)
     has_integrated_graphics: Mapped[bool] = mapped_column(default=False)
 
-    socket_type_rel: Mapped["SocketType"] = relationship(
-        back_populates="cpus", lazy="joined"
-    )
+    socket_type_rel: Mapped["SocketType"] = relationship(back_populates="cpus", lazy="joined")
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "cpu",
     }
 
@@ -170,13 +137,11 @@ class CPU(Component):
 class GPU(Component):
     __tablename__ = "gpus"
 
-    id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
+    id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
     vram: Mapped[int] = mapped_column(nullable=False)
     temperature: Mapped[int] = mapped_column(nullable=True)
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "gpu",
     }
 
@@ -184,12 +149,10 @@ class GPU(Component):
 class Soundcard(Component):
     __tablename__ = "soundcards"
 
-    id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
+    id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
     channels_quantity: Mapped[int] = mapped_column(nullable=False)
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "soundcard",
     }
 
@@ -197,19 +160,13 @@ class Soundcard(Component):
 class RAM(Component):
     __tablename__ = "rams"
 
-    id: Mapped[int] = mapped_column(
-        ForeignKey("components.id", ondelete="CASCADE"), primary_key=True
-    )
-    memory_type_id: Mapped[int] = mapped_column(
-        ForeignKey("memory_types.id"), nullable=False
-    )
+    id: Mapped[int] = mapped_column(ForeignKey("components.id", ondelete="CASCADE"), primary_key=True)
+    memory_type_id: Mapped[int] = mapped_column(ForeignKey("memory_types.id"), nullable=False)
     capacity: Mapped[int] = mapped_column(nullable=False)
     frequency: Mapped[int] = mapped_column(nullable=False)
 
-    memory_type_rel: Mapped["MemoryType"] = relationship(
-        back_populates="rams", lazy="joined"
-    )
+    memory_type_rel: Mapped["MemoryType"] = relationship(back_populates="rams", lazy="joined")
 
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "ram",
     }

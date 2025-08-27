@@ -17,27 +17,18 @@ def get_brand_choices_for(component_type: str):
     with session_factory() as session:
         return [
             (b.id, b.name)
-            for b in session.query(Brand)
-            .filter_by(component_type=component_type)
-            .order_by(Brand.name)
-            .all()
+            for b in session.query(Brand).filter_by(component_type=component_type).order_by(Brand.name).all()
         ]
 
 
 def get_socket_type_choices():
     with session_factory() as session:
-        return [
-            (st.id, st.name)
-            for st in session.query(SocketType).order_by(SocketType.name).all()
-        ]
+        return [(st.id, st.name) for st in session.query(SocketType).order_by(SocketType.name).all()]
 
 
 def get_memory_type_choices():
     with session_factory() as session:
-        return [
-            (mt.id, mt.name)
-            for mt in session.query(MemoryType).order_by(MemoryType.name).all()
-        ]
+        return [(mt.id, mt.name) for mt in session.query(MemoryType).order_by(MemoryType.name).all()]
 
 
 class BaseComponentForm(FlaskForm):
@@ -169,9 +160,7 @@ class SoundcardForm(BaseComponentForm):
 
 class AssemblyForm(FlaskForm):
     assembly_name = StringField("Assembly Name", validators=[DataRequired()])
-    assembly_quantity = IntegerField(
-        "Assembly Quantity", validators=[NumberRange(min=1, max=1000)], default=1
-    )
+    assembly_quantity = IntegerField("Assembly Quantity", validators=[NumberRange(min=1, max=1000)], default=1)
 
     cpu_component = FormField(CPUForm)
     gpu_component = FormField(GPUForm)
@@ -184,33 +173,23 @@ class AssemblyForm(FlaskForm):
 
 class AssemblySelectForm(FlaskForm):
     assembly_name = StringField("Assembly Name", validators=[DataRequired()])
-    assembly_quantity = IntegerField(
-        "Assemblies quantity", validators=[NumberRange(min=1, max=1000)], default=1
-    )
+    assembly_quantity = IntegerField("Assemblies quantity", validators=[NumberRange(min=1, max=1000)], default=1)
 
     motherboard_id = SelectField("Motherboard", coerce=int, validators=[DataRequired()])
-    motherboard_quantity = IntegerField(
-        "Motherboard quantity", default=1, validators=[NumberRange(min=1, max=100)]
-    )
+    motherboard_quantity = IntegerField("Motherboard quantity", default=1, validators=[NumberRange(min=1, max=100)])
 
     cpu_id = SelectField("CPU", coerce=int, validators=[DataRequired()])
-    cpu_quantity = IntegerField(
-        "CPU quantity", default=1, validators=[NumberRange(min=1, max=100)]
-    )
+    cpu_quantity = IntegerField("CPU quantity", default=1, validators=[NumberRange(min=1, max=100)])
 
     gpu_is_integrated = BooleanField("Use integrated GPU")
     gpu_id = SelectField("Discrete GPU", choices=[], coerce=int, validators=[])
     gpu_quantity = IntegerField("GPU quantity", default=1)
 
     ram_id = SelectField("RAM", coerce=int, validators=[DataRequired()])
-    ram_quantity = IntegerField(
-        "RAM quantity", default=1, validators=[NumberRange(min=1, max=100)]
-    )
+    ram_quantity = IntegerField("RAM quantity", default=1, validators=[NumberRange(min=1, max=100)])
 
     soundcard_id = SelectField("Soundcard", coerce=int, validators=[DataRequired()])
-    soundcard_quantity = IntegerField(
-        "Soundcard quantity", default=1, validators=[NumberRange(min=1, max=100)]
-    )
+    soundcard_quantity = IntegerField("Soundcard quantity", default=1, validators=[NumberRange(min=1, max=100)])
 
     submit = SubmitField("Create Assembly")
 

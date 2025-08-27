@@ -4,5 +4,9 @@ __pycache__/
 .env
 venv/
 .idea/
+.pytest_cache
+.ruff_cache
 *.cfg
 *.md
+.pre-commit-config.yml
+pyproject.toml
