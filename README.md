@@ -8,10 +8,11 @@
    2) Добавление своих компонентов/классификаторов/сборок;
 
 ## Стек-технологий
-Backend - Python, Flask, SQLAlchemy, PostgreSQL
-Frontend - HTML, CSS, Jinja2
+Backend - Python, Flask, SQLAlchemy, Alembic, PostgreSQL
+Frontend - HTML, CSS, Jinja2, Bootstrap 5
 
 ## Визуальное представление приложения
+
 
 ## Структура проекта
 
@@ -46,6 +47,7 @@ docker compose up --build
 
 ### 3. Перейдите по ссылке:
    [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
 
 
 
