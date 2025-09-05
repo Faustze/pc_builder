@@ -1,45 +1,49 @@
-# PC Builder Project
+# PCBuilder
 
-## Review
+## Обзор
+Это веб-приложение для сборки и управления компонентами ПК: материнские платы, процессоры, видеокарты, оперативная память и т.д.
 
-This is a Flask web application for assembling and managing PC components: motherboards, processors, video cards, RAM, etc. The compatibility of components is checked.
+Возможность: 
+   1) Проверяется совместимость компонентов по характеристикам;
+   2) Добавлять свои компоненты/классификаторы/сборки;
 
----
+## Стек-технологий
+Backend - Python, Flask, SQLAlchemy, PostgreSQL
+Frontend - HTML, CSS, Jinja2
 
-## Structure
+## Структура проекта
 
 ```text
-├── alembic               # Migration managment
 ├── app
-│   ├── __init__.py       # Creating app
-│   ├── api               # Application programming interface
-│   ├── config.py         # Loading .env file and get "settings" instance
-│   ├── database_data.py  # Generate data for database (Example of these PC assemblies)
-│   ├── database.py       # SQLAlchemy database configuration
-│   ├── forms.py          # Validation Flask-WTForms
-│   ├── models.py         # SQLAlchemy models
-│   ├── routes.py         # Flask routes
+│   ├── __init__.py       # Создание приложения
+│   ├── config.py         # Настройки приложения
+│   ├── database_data.py  # Создание примеров сборок/комплектующих/классификаторов компьютеров
+│   ├── database.py       # Настройка SQLAlchemy
+│   ├── forms.py          # Валидация моделей с помощью Flask-WTForms
+│   ├── models.py         # Модели SQLAlchemy
+│   ├── routes.py         # Flask CRUD API
 │   ├── static            # CSS
 │   └── templates         # HTML
-├── docker-compose.yml    # Application configuration for docker 
-├── Dockerfile            # Instructions for building a docker image 
-├── README.md             # Project discription
-├── requirements.txt      # Requirements for installation
-└── run.py                # Project launcher
+├── docker-compose.yml    # Конфигурация приложения для Docker
+├── Dockerfile            # Инструкции по созданию Docker образа
+├── README.md             # Описание проекта
+├── requirements.txt      # Используемые зависимости
+└── run.py                # Точка входа в проект
 ```
 
-### 1. Install Docker
+### 1. Установите Docker
 
 * Docker: [https://www.docker.com/](https://www.docker.com/)
 
-### 2. Launch docker image
+### 2. Выполните команду в терминале, для создания Docker образа
 
-On Linux/MacOS/Windows:
+Для Linux/MacOS/Windows:
 ```
 docker compose up --build
 ```
 
-### 3. Follow the link
+### 3. Перейдите по ссылке:
    [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
 
 
