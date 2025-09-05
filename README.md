@@ -23,11 +23,9 @@ This is a Flask web application for assembling and managing PC components: mothe
 │   └── templates         # HTML
 ├── docker-compose.yml    # Application configuration for docker 
 ├── Dockerfile            # Instructions for building a docker image 
-├── favicon.ico           # Site icon
 ├── README.md             # Project discription
 ├── requirements.txt      # Requirements for installation
-├── run.py                # Project launcher
-└── venv                  # Virtual environment (need to install)
+└── run.py                # Project launcher
 ```
 
 ### 1. Install Docker
@@ -36,15 +34,12 @@ This is a Flask web application for assembling and managing PC components: mothe
 
 ### 2. Launch docker image
 
-On Linux/MacOS:
-```bash
-sudo docker-compose up --build
+On Linux/MacOS/Windows:
 ```
-or Windows:
-```powershell
-docker-compose up --build
+docker compose up --build
 ```
 
 ### 3. Follow the link
    [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
 
