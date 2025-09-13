@@ -1,0 +1,13 @@
+.ruff_cache
+alembic/
+alembic.ini
+__pycache__/
+*.env
+venv/
+*.cfg
+*.md
+.pre-commit-config.yaml
+pyproject.toml
+setup.cfg
+docker-compose.dev.yml
+Dockerfile.dev

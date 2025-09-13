@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Assembly{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">Edit Assembly: {{ assembly.name }}</h2>
+
+  <form method="POST" action="{{ url_for('edit_assembly', assembly_id=assembly.id) }}">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.assembly_name.label(class="form-label") }}
+      {{ form.assembly_name(class="form-control", placeholder="Enter assembly name") }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.assembly_quantity.label(class="form-label") }}
+      {{ form.assembly_quantity(class="form-control", type="number", min="1", max="1000") }}
+    </div>
+
+    <div class="mb-3 row align-items-center">
+      <label for="{{ form.motherboard_id.id }}" class="col-sm-4 col-form-label">Motherboard</label>
+      <div class="col-sm-5">
+        {{ form.motherboard_id(class="form-select") }}
+      </div>
+      <label for="{{ form.motherboard_quantity.id }}" class="col-sm-1 col-form-label text-center">Quantity</label>
+      <div class="col-sm-2">
+        {{ form.motherboard_quantity(class="form-control", type="number", min="1", max="100") }}
+      </div>
+    </div>
+
+    <div class="mb-3 row align-items-center">
+      <label for="{{ form.cpu_id.id }}" class="col-sm-4 col-form-label">CPU</label>
+      <div class="col-sm-5">
+        {{ form.cpu_id(class="form-select") }}
+      </div>
+      <label for="{{ form.cpu_quantity.id }}" class="col-sm-1 col-form-label text-center">Quantity</label>
+      <div class="col-sm-2">
+        {{ form.cpu_quantity(class="form-control", type="number", min="1", max="100") }}
+      </div>
+    </div>
+
+    <div class="mb-3 form-check">
+      {{ form.gpu_is_integrated(class="form-check-input", id="gpuIntegrated") }}
+      <label class="form-check-label" for="gpuIntegrated">{{ form.gpu_is_integrated.label.text }}</label>
+    </div>
+
+    <div class="mb-3 row align-items-center">
+      <label for="{{ form.gpu_id.id }}" class="col-sm-4 col-form-label">Discrete GPU</label>
+      <div class="col-sm-5">
+        {{ form.gpu_id(class="form-select") }}
+      </div>
+      <label for="{{ form.gpu_quantity.id }}" class="col-sm-1 col-form-label text-center">Quantity</label>
+      <div class="col-sm-2">
+        {{ form.gpu_quantity(class="form-control", type="number", min="1") }}
+      </div>
+    </div>
+
+    <div class="mb-3 row align-items-center">
+      <label for="{{ form.ram_id.id }}" class="col-sm-4 col-form-label">RAM</label>
+      <div class="col-sm-5">
+        {{ form.ram_id(class="form-select") }}
+      </div>
+      <label for="{{ form.ram_quantity.id }}" class="col-sm-1 col-form-label text-center">Quantity</label>
+      <div class="col-sm-2">
+        {{ form.ram_quantity(class="form-control", type="number", min="1", max="100") }}
+      </div>
+    </div>
+
+    <div class="mb-3 row align-items-center">
+      <label for="{{ form.soundcard_id.id }}" class="col-sm-4 col-form-label">Soundcard</label>
+      <div class="col-sm-5">
+        {{ form.soundcard_id(class="form-select") }}
+      </div>
+      <label for="{{ form.soundcard_quantity.id }}" class="col-sm-1 col-form-label text-center">Quantity</label>
+      <div class="col-sm-2">
+        {{ form.soundcard_quantity(class="form-control", type="number", min="1", max="100") }}
+      </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+      <a href="{{ url_for('get_assemblies_page') }}" class="btn btn-secondary me-md-2">Cancel</a>
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+
+<script>
+  const integratedCheckbox = document.getElementById('gpuIntegrated');
+  const gpuSelect = document.getElementById('{{ form.gpu_id.id }}');
+  const gpuQuantity = document.getElementById('{{ form.gpu_quantity.id }}');
+
+  function toggleGpuFields() {
+    const disabled = integratedCheckbox.checked;
+    gpuSelect.disabled = disabled;
+    gpuQuantity.disabled = disabled;
+  }
+
+  integratedCheckbox.addEventListener('change', toggleGpuFields);
+  toggleGpuFields();
+</script>
+{% endblock %}

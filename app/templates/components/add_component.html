@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Component{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4 text-center">➕ Add a New Component</h2>
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('add_component_motherboard') }}" class="card text-center h-100 shadow-sm text-decoration-none text-dark">
+        <div class="card-body">
+          <div class="fs-1">🖥️</div>
+          <h5 class="card-title mt-2">Motherboard</h5>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('add_component_cpu') }}" class="card text-center h-100 shadow-sm text-decoration-none text-dark">
+        <div class="card-body">
+          <div class="fs-1">🧠</div>
+          <h5 class="card-title mt-2">CPU</h5>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('add_component_gpu') }}" class="card text-center h-100 shadow-sm text-decoration-none text-dark">
+        <div class="card-body">
+          <div class="fs-1">🎮</div>
+          <h5 class="card-title mt-2">GPU</h5>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('add_component_ram') }}" class="card text-center h-100 shadow-sm text-decoration-none text-dark">
+        <div class="card-body">
+          <div class="fs-1">💾</div>
+          <h5 class="card-title mt-2">RAM</h5>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('add_component_soundcard') }}" class="card text-center h-100 shadow-sm text-decoration-none text-dark">
+        <div class="card-body">
+          <div class="fs-1">🎧</div>
+          <h5 class="card-title mt-2">Sound Card</h5>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
