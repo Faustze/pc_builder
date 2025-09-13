@@ -3,7 +3,11 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, fields
 from flask_restx.reqparse import RequestParser
 
+<<<<<<< HEAD
 from .common_models import register_common_models
+=======
+from app.common_models import register_common_models
+>>>>>>> c5f234ff2ba19e75b2d1e9b596f23c9b79a73b6d
 
 components_ns = Namespace("components", description="Операции с компонентами")
 models = register_common_models(components_ns)

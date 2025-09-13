@@ -7,7 +7,6 @@ from app.database_data import seed_data
 from app.models import Base
 from app.routes import init_routes
 
-
 csrf = CSRFProtect()
 
 

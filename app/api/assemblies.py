@@ -1,7 +1,11 @@
 from flask_restx import Namespace, Resource, fields
 
 from app.api.components import status_code
+<<<<<<< HEAD
 from .common_models import register_common_models
+=======
+from app.common_models import register_common_models
+>>>>>>> c5f234ff2ba19e75b2d1e9b596f23c9b79a73b6d
 
 assemblies_ns = Namespace("assemblies", description="Операции со сборками")
 models = register_common_models(assemblies_ns)
